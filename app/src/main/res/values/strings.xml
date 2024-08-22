@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Dragon Flight</string>
+    <string name="loading">LOADING%1$s</string>
+    <string name="loading1">LOADING</string>
 </resources>
