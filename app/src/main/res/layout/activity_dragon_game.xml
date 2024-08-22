@@ -7,4 +7,18 @@
     android:layout_height="match_parent"
     tools:context=".presentation.game_activity.DragonGameActivity">
 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/game_bckgr"
+        android:scaleType="centerCrop"
+        />
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/conteinerDragon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.dragon.flight.simulgame.presentation.begin.BeginGameFragment"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
