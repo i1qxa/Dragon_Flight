@@ -4,4 +4,7 @@
     <string name="loading1">LOADING</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="raptor_flight">RAPTOR FLIGHT</string>
+    <string name="rules">RULES</string>
+    <string name="about_description">Control Your Dragon: push left or right arrows to move your dragon in space.\n\nDodge the Bombs: Avoid colliding with incoming bombs by maneuvering your dragon\n\nCollect rubies: To increase your score try to collect as many rubies, as you can.\n\nSurvive the Countdown: Stay alive until the timer runs out to complete the level.\n\nGood luck!</string>
 </resources>

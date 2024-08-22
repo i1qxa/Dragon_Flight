@@ -10,9 +10,13 @@ import android.text.style.StrikethroughSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.text.getSpans
 import androidx.fragment.app.Fragment
+import com.dragon.flight.simulgame.data.OutlinedText
+import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.databinding.FragmentBeginGameBinding
+import com.dragon.flight.simulgame.presentation.about.AboutFragment
 
 class BeginGameFragment : Fragment() {
 
@@ -28,9 +32,25 @@ class BeginGameFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupHeader()
+        setupButtonClickListeners()
+    }
+
+    private fun setupButtonClickListeners(){
+        binding.btnPravila.setOnClickListener {
+            parentFragmentManager.launchNewFragment(AboutFragment())
+        }
     }
 
     private fun setupHeader() {
+        val outlinedTV = OutlinedText(
+            binding.tvAppName,
+            binding.tvAppName2,
+            binding.tvAppName3,
+            binding.tvAppName4,
+            8F,
+            Color.RED
+        )
+        outlinedTV.makeTVOutlined()
     }
 
 }
