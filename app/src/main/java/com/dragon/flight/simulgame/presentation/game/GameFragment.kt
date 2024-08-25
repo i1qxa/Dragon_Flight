@@ -1,15 +1,19 @@
 package com.dragon.flight.simulgame.presentation.game
 
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import com.dragon.flight.simulgame.R
 import com.dragon.flight.simulgame.data.OutlinedText
+import com.dragon.flight.simulgame.data.dataStore
+import com.dragon.flight.simulgame.data.isSoundOnKey
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.databinding.FragmentGameBinding
 import com.dragon.flight.simulgame.presentation.game_result.GameResultFragment
@@ -32,6 +36,8 @@ class GameFragment : Fragment() {
             binding.item6
         )
     }
+    private var mediaPlayer: MediaPlayer? = null
+    private var isSoundOn = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,22 +55,56 @@ class GameFragment : Fragment() {
         observeGameLose()
         observeGameWin()
         observeTimer()
+        observeSoundSettings()
+        observeCoinSound()
     }
 
-    private fun observeGameLose(){
-        viewModel.isGameLose.observe(viewLifecycleOwner){
+    private fun observeSoundSettings() {
+        requireContext().dataStore.data.asLiveData().observe(viewLifecycleOwner) {
+            isSoundOn = it[isSoundOnKey] ?: true
+        }
+    }
+
+    private fun stopSound() {
+        if (mediaPlayer != null) {
+            mediaPlayer!!.stop()
+            mediaPlayer!!.release()
+            mediaPlayer = null
+        }
+    }
+
+
+    private fun playSound() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(requireContext(), R.raw.coin_sound)
+            mediaPlayer!!.isLooping = false
+            mediaPlayer!!.start()
+        } else mediaPlayer!!.start()
+    }
+
+    private fun observeCoinSound() {
+        viewModel.shouldPlaySound.observe(viewLifecycleOwner) {
+            if (isSoundOn && it) {
+                stopSound()
+                playSound()
+            }
+        }
+    }
+
+    private fun observeGameLose() {
+        viewModel.isGameLose.observe(viewLifecycleOwner) {
             parentFragmentManager.launchNewFragment(GameResultFragment.newInstance(0))
         }
     }
 
-    private fun observeGameWin(){
-        viewModel.isGameWin.observe(viewLifecycleOwner){
+    private fun observeGameWin() {
+        viewModel.isGameWin.observe(viewLifecycleOwner) {
             parentFragmentManager.launchNewFragment(GameResultFragment.newInstance(it))
         }
     }
 
-    private fun observeTimer(){
-        viewModel.timerLD.observe(viewLifecycleOwner){
+    private fun observeTimer() {
+        viewModel.timerLD.observe(viewLifecycleOwner) {
             val time = convertTime(it)
             binding.tvTimer.text = time
             binding.tvTimer2.text = time
@@ -73,12 +113,12 @@ class GameFragment : Fragment() {
         }
     }
 
-    private fun convertTime(timeInSeconds:Int):String{
+    private fun convertTime(timeInSeconds: Int): String {
         return String.format("%02d:%02d", timeInSeconds / 60, timeInSeconds % 60)
     }
 
-    private fun observeData(){
-        viewModel.scoreLD.observe(viewLifecycleOwner){
+    private fun observeData() {
+        viewModel.scoreLD.observe(viewLifecycleOwner) {
             binding.tvScoreValue.text = it.toString()
             binding.tvScoreValue2.text = it.toString()
             binding.tvScoreValue3.text = it.toString()
@@ -86,12 +126,15 @@ class GameFragment : Fragment() {
         }
     }
 
-    private fun setupBtnClickListeners(){
+    private fun setupBtnClickListeners() {
         binding.btnBack.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
         binding.btnSettings.setOnClickListener {
-            parentFragmentManager.launchNewFragment(SettingsFragment())
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.conteinerDragon, SettingsFragment())
+                commit()
+            }
         }
         binding.btnLeft.setOnClickListener {
             viewModel.moveDragon(true)
@@ -109,7 +152,7 @@ class GameFragment : Fragment() {
                 Pair(binding.item1.x, binding.item1.y),
                 Pair(
                     (binding.btnRight.x - binding.item1.width),
-                    (binding.dragon.y + binding.dragon.height/3)
+                    (binding.dragon.y + binding.dragon.height / 3)
                 )
             )
         }

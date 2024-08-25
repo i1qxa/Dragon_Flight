@@ -7,14 +7,14 @@ import android.widget.ImageView
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.dragon.flight.simulgame.R
 import com.dragon.flight.simulgame.data.BASE_GAME_DURATION
 import com.dragon.flight.simulgame.data.BASE_MULTI
 import com.dragon.flight.simulgame.data.dataStore
 import com.dragon.flight.simulgame.data.lastCompleteLvlKey
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -36,6 +36,8 @@ class GameViewModel(private val application: Application) : AndroidViewModel(app
     val timerLD = MutableLiveData<Int>()
     val isGameWin = MutableLiveData<Int>()
     private var lastCompleteLvl = 1
+    val shouldPlaySound = MutableLiveData<Boolean>()
+    var timerScope:CoroutineScope? = null
 
     @SuppressLint("StaticFieldLeak")
     private lateinit var dragon: ImageView
@@ -60,6 +62,7 @@ class GameViewModel(private val application: Application) : AndroidViewModel(app
 
     private fun launchCountDawnTimer() {
         viewModelScope.launch {
+            timerScope = this
             while (timerValue > 0) {
                 delay(1000)
                 timerValue--
@@ -115,10 +118,14 @@ class GameViewModel(private val application: Application) : AndroidViewModel(app
                 listOfItems.filter { it.y > dragon.y }.map {
                     val itemX = Pair(it.x, (it.x + it.width))
                     if (dragonX.first in itemX.first..itemX.second || itemX.first in dragonX.first..dragonX.second) {
-                        val score = (scoreLD.value ?: 0) + 10
-                        scoreLD.postValue(score)
+
                         if (it.drawable == bombImg) {
                             isGameLose.postValue(Unit)
+                            timerScope?.cancel()
+                        }else{
+                            val score = (scoreLD.value ?: 0) + 10
+                            scoreLD.postValue(score)
+                            shouldPlaySound.postValue(true)
                         }
                     }
                     launchFallingDawnAnim(it)

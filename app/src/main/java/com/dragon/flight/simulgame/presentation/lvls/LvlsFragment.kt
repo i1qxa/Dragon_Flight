@@ -2,12 +2,11 @@ package com.dragon.flight.simulgame.presentation.lvls
 
 import android.graphics.Color
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.asLiveData
 import com.dragon.flight.simulgame.R
 import com.dragon.flight.simulgame.data.OutlinedText
@@ -15,6 +14,7 @@ import com.dragon.flight.simulgame.data.dataStore
 import com.dragon.flight.simulgame.data.lastCompleteLvlKey
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.databinding.FragmentLvlsBinding
+import com.dragon.flight.simulgame.presentation.begin.BeginGameFragment
 import com.dragon.flight.simulgame.presentation.game.GameFragment
 
 
@@ -69,13 +69,16 @@ class LvlsFragment : Fragment() {
 
     private fun setupBtnBackClickListener(){
         binding.btnBack.setOnClickListener {
-            parentFragmentManager.popBackStack()
+            parentFragmentManager.launchNewFragment(BeginGameFragment())
         }
     }
 
     private fun setupLvlClickListener(btnLvl: TextView) {
         btnLvl.setOnClickListener {
-            parentFragmentManager.launchNewFragment(GameFragment())
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.conteinerDragon, GameFragment())
+                commit()
+            }
         }
     }
 

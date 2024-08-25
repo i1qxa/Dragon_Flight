@@ -1,11 +1,16 @@
 package com.dragon.flight.simulgame.presentation.game_activity
 
+import android.content.pm.ActivityInfo
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.asLiveData
 import com.dragon.flight.simulgame.R
+import com.dragon.flight.simulgame.data.dataStore
+import com.dragon.flight.simulgame.data.isMusicOnKey
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.presentation.begin.BeginGameFragment
 import com.dragon.flight.simulgame.presentation.game_result.GameResultFragment
@@ -14,6 +19,9 @@ import com.dragon.flight.simulgame.presentation.quit.QuitFragment
 import com.dragon.flight.simulgame.presentation.settings.SettingsFragment
 
 class DragonGameActivity : AppCompatActivity() {
+
+    private var mediaPlayer: MediaPlayer? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -23,6 +31,8 @@ class DragonGameActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+        observeSound()
     }
 
     override fun onBackPressed() {
@@ -41,11 +51,40 @@ class DragonGameActivity : AppCompatActivity() {
                 super.onBackPressed()
             }
         }
-//        if (supportFragmentManager.findFragmentById(R.id.conteinerDragon) is BeginGameFragment) {
-//            supportFragmentManager.launchNewFragment(QuitFragment())
-//        } else {
-//            super.onBackPressed()
-//        }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(mediaPlayer!=null){
+            mediaPlayer!!.release()
+            mediaPlayer=null
+        }
+    }
+
+    private fun playSound() {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(this, R.raw.music)
+            mediaPlayer!!.isLooping = true
+            mediaPlayer!!.start()
+        } else mediaPlayer!!.start()
+    }
+
+    private fun stopSound() {
+        if (mediaPlayer != null) {
+            mediaPlayer!!.stop()
+            mediaPlayer!!.release()
+            mediaPlayer = null
+        }
+    }
+
+    private fun observeSound(){
+        dataStore.data.asLiveData().observe(this){
+            if (it[isMusicOnKey] != false){
+                playSound()
+            }else{
+                stopSound()
+            }
+        }
     }
 
 }

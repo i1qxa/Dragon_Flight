@@ -1,13 +1,17 @@
 package com.dragon.flight.simulgame.presentation.game_result
 
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.asLiveData
 import com.dragon.flight.simulgame.R
 import com.dragon.flight.simulgame.data.OutlinedText
+import com.dragon.flight.simulgame.data.dataStore
+import com.dragon.flight.simulgame.data.isSoundOnKey
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.databinding.FragmentGameResultBinding
 import com.dragon.flight.simulgame.presentation.game.GameFragment
@@ -17,6 +21,7 @@ private const val SCORE = "score"
 
 class GameResultFragment : Fragment() {
 
+    private var mediaPlayer: MediaPlayer? = null
     private var score: Int = 0
     private val binding by lazy { FragmentGameResultBinding.inflate(layoutInflater) }
 
@@ -39,14 +44,33 @@ class GameResultFragment : Fragment() {
         initFragment()
     }
 
+    private fun observeSoundSettings(isWin: Boolean) {
+        requireContext().dataStore.data.asLiveData().observe(viewLifecycleOwner) {
+            if(it[isSoundOnKey] != false){
+                val soundId = if (isWin) R.raw.win else R.raw.lose
+                playSound(soundId)
+            }
+        }
+    }
+
+    private fun playSound(soundId: Int) {
+        if (mediaPlayer == null) {
+            mediaPlayer = MediaPlayer.create(requireContext(), soundId)
+            mediaPlayer!!.isLooping = false
+            mediaPlayer!!.start()
+        } else mediaPlayer!!.start()
+    }
+
     private fun initFragment() {
         binding.btnBack.setOnClickListener {
             parentFragmentManager.launchNewFragment(LvlsFragment())
         }
         if (score > 0) {
             launchWin()
+            observeSoundSettings(true)
         } else {
             launchLose()
+            observeSoundSettings(false)
         }
     }
 

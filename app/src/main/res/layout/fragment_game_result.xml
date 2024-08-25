@@ -15,15 +15,25 @@
         />
 
     <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/game_bckgr"
+        android:scaleType="centerCrop"
+        />
+
+    <ImageView
         android:id="@+id/winBckgr"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/mainBtn"
-        android:src="@drawable/win_bckgr"
+        android:alpha="0.5"
         android:scaleType="centerCrop"
-        />
+        android:src="@drawable/win_bckgr"
+        app:layout_constraintBottom_toTopOf="@id/mainBtn"
+        app:layout_constraintStart_toStartOf="parent"
+
+        app:layout_constraintTop_toTopOf="parent" />
+
+
 
     <ImageView
         android:id="@+id/btnBack"

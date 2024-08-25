@@ -1,6 +1,7 @@
 package com.dragon.flight.simulgame.presentation
 
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -27,11 +28,11 @@ class MainActivity : AppCompatActivity() {
         }
         observeLoadingText()
         checkFinishLoading()
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
     private fun observeLoadingText(){
         viewModel.loadingTextLD.observe(this){
-//            binding.tvLoading.text = getString(R.string.loading, it)
             binding.tvLoadingDots.text = it
         }
     }
