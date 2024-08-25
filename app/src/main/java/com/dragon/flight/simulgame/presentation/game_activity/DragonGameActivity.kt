@@ -6,6 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.dragon.flight.simulgame.R
+import com.dragon.flight.simulgame.data.launchNewFragment
+import com.dragon.flight.simulgame.presentation.begin.BeginGameFragment
+import com.dragon.flight.simulgame.presentation.quit.QuitFragment
 
 class DragonGameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -18,4 +21,13 @@ class DragonGameActivity : AppCompatActivity() {
             insets
         }
     }
+
+    override fun onBackPressed() {
+        if (supportFragmentManager.findFragmentById(R.id.conteinerDragon) is BeginGameFragment) {
+            supportFragmentManager.launchNewFragment(QuitFragment())
+        } else {
+            super.onBackPressed()
+        }
+    }
+
 }

@@ -50,4 +50,5 @@ dependencies {
     implementation(libs.androidx.ui.graphics.android)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.preferences)
 }

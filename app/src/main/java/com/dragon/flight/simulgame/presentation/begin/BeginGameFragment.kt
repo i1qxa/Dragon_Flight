@@ -17,6 +17,9 @@ import com.dragon.flight.simulgame.data.OutlinedText
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.databinding.FragmentBeginGameBinding
 import com.dragon.flight.simulgame.presentation.about.AboutFragment
+import com.dragon.flight.simulgame.presentation.game.GameFragment
+import com.dragon.flight.simulgame.presentation.lvls.LvlsFragment
+import com.dragon.flight.simulgame.presentation.quit.QuitFragment
 import com.dragon.flight.simulgame.presentation.settings.SettingsFragment
 
 class BeginGameFragment : Fragment() {
@@ -42,6 +45,12 @@ class BeginGameFragment : Fragment() {
         }
         binding.btnNastroiki.setOnClickListener{
             parentFragmentManager.launchNewFragment(SettingsFragment())
+        }
+        binding.btnFinish.setOnClickListener {
+            parentFragmentManager.launchNewFragment(QuitFragment())
+        }
+        binding.btnBegin.setOnClickListener {
+            parentFragmentManager.launchNewFragment(LvlsFragment())
         }
     }
 
