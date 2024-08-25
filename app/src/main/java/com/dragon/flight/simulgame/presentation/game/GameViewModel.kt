@@ -1,23 +1,41 @@
 package com.dragon.flight.simulgame.presentation.game
 
 import android.annotation.SuppressLint
+import android.app.Application
 import android.view.View
 import android.widget.ImageView
+import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.dragon.flight.simulgame.R
+import com.dragon.flight.simulgame.data.BASE_GAME_DURATION
+import com.dragon.flight.simulgame.data.BASE_MULTI
+import com.dragon.flight.simulgame.data.dataStore
+import com.dragon.flight.simulgame.data.lastCompleteLvlKey
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
-class GameViewModel : ViewModel() {
+class GameViewModel(private val application: Application) : AndroidViewModel(application) {
 
     private var topLeftCorner = Pair(0F, 0F)
     private var bottomRightCorner = Pair(0F, 0F)
     private var listOfItems = mutableListOf<ImageView>()
-    private var score = 0
     val scoreLD = MutableLiveData<Int>()
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private val bombImg = application.baseContext.getDrawable(R.drawable.bomb)
+
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private val rubyImg = application.baseContext.getDrawable(R.drawable.ruby)
+    val isGameLose = MutableLiveData<Any>()
+    var timerValue = 0
+    val timerLD = MutableLiveData<Int>()
+    val isGameWin = MutableLiveData<Int>()
+    private var lastCompleteLvl = 1
 
     @SuppressLint("StaticFieldLeak")
     private lateinit var dragon: ImageView
@@ -29,6 +47,31 @@ class GameViewModel : ViewModel() {
         dragon = dragonView
         launchGame()
         observeGame()
+        viewModelScope.launch {
+            application.dataStore.data.collect {
+                lastCompleteLvl = it[lastCompleteLvlKey] ?: 1
+                val timer = BASE_GAME_DURATION + lastCompleteLvl * BASE_MULTI
+                timerValue = timer
+                timerLD.postValue(timer)
+                launchCountDawnTimer()
+            }
+        }
+    }
+
+    private fun launchCountDawnTimer() {
+        viewModelScope.launch {
+            while (timerValue > 0) {
+                delay(1000)
+                timerValue--
+                timerLD.postValue(timerValue)
+            }
+            application.dataStore.edit {
+                it[lastCompleteLvlKey] = lastCompleteLvl+1
+            }
+            val score = scoreLD.value ?: 0
+            isGameWin.postValue(score)
+        }
+
     }
 
     fun setupLimits(topLeft: Pair<Float, Float>, bottomRight: Pair<Float, Float>) {
@@ -38,19 +81,20 @@ class GameViewModel : ViewModel() {
 
     private fun launchGame() {
         viewModelScope.launch {
+            delay(300)
             listOfItems.map {
-                delay(1000)
                 launchFallingDawnAnim(it)
+                delay(1000)
             }
         }
     }
 
     private fun launchFallingDawnAnim(item: ImageView) {
         item.visibility = View.VISIBLE
-        if (Random.nextBoolean()) {
-            item.setImageResource(R.drawable.ruby)
+        if (getRandomBomb()) {
+            item.setImageDrawable(rubyImg)
         } else {
-            item.setImageResource(R.drawable.bomb)
+            item.setImageDrawable(bombImg)
         }
         item.x = getRandomX()
         item.y = topLeftCorner.second
@@ -69,12 +113,15 @@ class GameViewModel : ViewModel() {
                 delay(200)
                 val dragonX = Pair(dragon.x, (dragon.x + dragon.width))
                 listOfItems.filter { it.y > dragon.y }.map {
-                    val itemX = Pair(it.x, (it.x+it.width))
-                    if (dragonX.first in itemX.first..itemX.second || itemX.first in dragonX.first..dragonX.second){
+                    val itemX = Pair(it.x, (it.x + it.width))
+                    if (dragonX.first in itemX.first..itemX.second || itemX.first in dragonX.first..dragonX.second) {
                         val score = (scoreLD.value ?: 0) + 10
                         scoreLD.postValue(score)
-                        launchFallingDawnAnim(it)
+                        if (it.drawable == bombImg) {
+                            isGameLose.postValue(Unit)
+                        }
                     }
+                    launchFallingDawnAnim(it)
                 }
             }
         }
@@ -83,11 +130,11 @@ class GameViewModel : ViewModel() {
     fun moveDragon(isMoveLeft: Boolean) {
         var newX = dragon.x
         if (isMoveLeft) {
-            newX -= 60F
+            newX -= 80F
             if (newX < topLeftCorner.first) newX = topLeftCorner.first
 
         } else {
-            newX += 60F
+            newX += 80F
             if (newX > bottomRightCorner.first) newX = bottomRightCorner.first
         }
         dragon.animate().apply {
@@ -98,6 +145,11 @@ class GameViewModel : ViewModel() {
 
     private fun getRandomX(): Float {
         return topLeftCorner.first + (bottomRightCorner.first - topLeftCorner.first) * Random.nextFloat()
+    }
+
+    private fun getRandomBomb(): Boolean {
+        val randomInt = 1 + Random.nextInt(5)
+        return if (randomInt > 4) false else true
     }
 
 }

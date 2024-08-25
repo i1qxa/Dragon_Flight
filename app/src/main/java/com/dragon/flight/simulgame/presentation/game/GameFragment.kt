@@ -12,6 +12,7 @@ import com.dragon.flight.simulgame.R
 import com.dragon.flight.simulgame.data.OutlinedText
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.databinding.FragmentGameBinding
+import com.dragon.flight.simulgame.presentation.game_result.GameResultFragment
 import com.dragon.flight.simulgame.presentation.settings.SettingsFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -45,6 +46,35 @@ class GameFragment : Fragment() {
         setupListOfItems()
         setupBtnClickListeners()
         observeData()
+        observeGameLose()
+        observeGameWin()
+        observeTimer()
+    }
+
+    private fun observeGameLose(){
+        viewModel.isGameLose.observe(viewLifecycleOwner){
+            parentFragmentManager.launchNewFragment(GameResultFragment.newInstance(0))
+        }
+    }
+
+    private fun observeGameWin(){
+        viewModel.isGameWin.observe(viewLifecycleOwner){
+            parentFragmentManager.launchNewFragment(GameResultFragment.newInstance(it))
+        }
+    }
+
+    private fun observeTimer(){
+        viewModel.timerLD.observe(viewLifecycleOwner){
+            val time = convertTime(it)
+            binding.tvTimer.text = time
+            binding.tvTimer2.text = time
+            binding.tvTimer3.text = time
+            binding.tvTimer4.text = time
+        }
+    }
+
+    private fun convertTime(timeInSeconds:Int):String{
+        return String.format("%02d:%02d", timeInSeconds / 60, timeInSeconds % 60)
     }
 
     private fun observeData(){

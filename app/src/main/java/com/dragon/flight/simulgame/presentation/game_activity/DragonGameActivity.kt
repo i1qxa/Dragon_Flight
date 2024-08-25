@@ -8,7 +8,10 @@ import androidx.core.view.WindowInsetsCompat
 import com.dragon.flight.simulgame.R
 import com.dragon.flight.simulgame.data.launchNewFragment
 import com.dragon.flight.simulgame.presentation.begin.BeginGameFragment
+import com.dragon.flight.simulgame.presentation.game_result.GameResultFragment
+import com.dragon.flight.simulgame.presentation.lvls.LvlsFragment
 import com.dragon.flight.simulgame.presentation.quit.QuitFragment
+import com.dragon.flight.simulgame.presentation.settings.SettingsFragment
 
 class DragonGameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,11 +26,26 @@ class DragonGameActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (supportFragmentManager.findFragmentById(R.id.conteinerDragon) is BeginGameFragment) {
-            supportFragmentManager.launchNewFragment(QuitFragment())
-        } else {
-            super.onBackPressed()
+        val fragment = supportFragmentManager.findFragmentById(R.id.conteinerDragon)
+        when(fragment){
+            is BeginGameFragment ->{
+                supportFragmentManager.launchNewFragment(QuitFragment())
+            }
+            is SettingsFragment ->{
+                supportFragmentManager.launchNewFragment(BeginGameFragment())
+            }
+            is GameResultFragment ->{
+                supportFragmentManager.launchNewFragment(LvlsFragment())
+            }
+            else ->{
+                super.onBackPressed()
+            }
         }
+//        if (supportFragmentManager.findFragmentById(R.id.conteinerDragon) is BeginGameFragment) {
+//            supportFragmentManager.launchNewFragment(QuitFragment())
+//        } else {
+//            super.onBackPressed()
+//        }
     }
 
 }
